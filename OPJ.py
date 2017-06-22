@@ -3,7 +3,8 @@ from pygame.locals import *
 import os
 from opener import *
 from collect import *
-
+from arranger import *
+  
 
 mode = 0
 #Modes:
@@ -12,7 +13,7 @@ mode = 0
 #2 synth
 looping = False
 
-SYNTH = ["Keyboard","Drumrack","Custom"]
+SYNTH = ["Arranger","Keyboard","Drumrack","Custom"]
 
 if __name__ == "__main__":
     pass
@@ -24,8 +25,22 @@ def scan(folder,extension):
             items.append(item)
     print items
     return items
-
-
+class Status():
+	lastId = 0
+	def __init__(s,values):
+		s.lastId = int(values.get("lastId"))
+	def __repr__(s):
+		return '{"lastId":'+str(s.lastId)+'}'
+	def getNewId(s):
+		s.lastId +=1
+		with open("status.json","w") as f:
+			print s
+			f.write(str(s))
+		return s.lastId
+	
+with open("status.json","r") as f:
+	status = json.load(f,object_hook=Status)
+print status
 pygame.init()
 pygame.font.init()
 swidth = pygame.display.Info().current_w
@@ -41,16 +56,19 @@ while True:
 	coice = prompt.loop()
 	mode = 2
 	if coice == "Keyboard":
-		over = Keyboard(DISPLAYSURF)
-	if coice == "Drumrack":
-		over = Drumrack(DISPLAYSURF)
+		over = Keyboard(DISPLAYSURF,seasonId=status.getNewId())
+	if coice == "Drumrack": 
+		over = Drumrack(DISPLAYSURF,seasonId=status.getNewId())
+	if coice == "Arranger":
+		over = Arranger(DISPLAYSURF)
+		over.loop()
 	elif coice == "Custom":
 		list = scan("pds",".pd")
 		prompt = Promt(DISPLAYSURF,list)
 		coice = prompt.loop()
 		print coice
 		coice = os.path.join("pds",coice)
-		custom = Custom(DISPLAYSURF)
-		custom.start(coice)
+		over = Custom(DISPLAYSURF,seasonId=status.getNewId())
+		over.start(coice)
 		#TODO start custom synth
 	print "Finish"
