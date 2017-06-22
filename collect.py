@@ -39,7 +39,7 @@ class Overlay:
     BLUE  = (  0,   0, 255)
     KEYS = [97, 119, 115, 101, 100, 102, 116, 103, 122, 104, 117, 106, 107, 111, 108, 112, 246, 252, 228]
     WHITES = [True,False,True,False,True,True,False,True,False,True,False,True,True,False,True,False,True,False,True]
-    def __init__(s,display):
+    def __init__(s,display,**option):
         s.DISPLAYSURF = display
         s.looping = False
         s.pd = PdOpener(s)
@@ -47,6 +47,10 @@ class Overlay:
         s.looping = False
         s.notes = []
         s.DEBUG = False
+        if option.get("seasonId"):
+            s.seasonId = int(option.get("seasonId"))
+        else:
+            s.seasonId = 0
         s.init() 
     def init(s):
         s.pd.startSynth("pds/net.pd")
@@ -105,15 +109,16 @@ class Overlay:
                         s.pd.send2Pd(message)
                     break
     def Quit(s):
+        s.stopRec()
         s.pd.pd.kill()
         s.looping=False
         if __name__ == "__main__":
             pygame.quit()
             sys.exit()
     def startRec(s):
-        id = 0
+        id = s.seasonId
         s.pd.send(4,"rec/"+str(id) + ".wav")
-        print "isRec = True"
+        print "isRec = True"+ str(id)
         s.isRec = True
     def stopRec(s):
         s.pd.send(4,0)
